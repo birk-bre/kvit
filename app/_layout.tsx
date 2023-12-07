@@ -1,5 +1,6 @@
-import { Suspense, useEffect } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useColorScheme } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   DarkTheme,
   DefaultTheme,
@@ -47,6 +48,7 @@ export default function Layout() {
                 screenOptions={{
                   headerShown: false
                 }}
+                initialRouteName="onboarding"
               >
                 <Stack.Screen name="(tabs)" />
               </Stack>
