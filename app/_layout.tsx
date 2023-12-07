@@ -14,6 +14,11 @@ import config from "../tamagui.config";
 
 SplashScreen.preventAutoHideAsync();
 
+export const unstable_settings = {
+  // Ensure any route can link back to `/`
+  initialRouteName: "(tabs)"
+};
+
 export default function Layout() {
   const colorScheme = useColorScheme();
 
@@ -42,7 +47,9 @@ export default function Layout() {
                 screenOptions={{
                   headerShown: false
                 }}
-              />
+              >
+                <Stack.Screen name="(tabs)" />
+              </Stack>
             </MySafeAreaView>
           </ThemeProvider>
         </Theme>
