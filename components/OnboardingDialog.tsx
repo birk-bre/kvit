@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { X } from "@tamagui/lucide-icons";
+import { set } from "date-fns";
 import {
   Adapt,
   Button,
@@ -11,6 +12,7 @@ import {
   ScrollView,
   Sheet,
   Text,
+  TextArea,
   Unspaced,
   XStack,
   YStack
@@ -18,13 +20,49 @@ import {
 
 import { useDataStore } from "../utils/coreData";
 
-export function OnboardingDialog({ defaultOpen }: { defaultOpen?: boolean }) {
+let listeners = [];
+let onboardingTriggered = false;
+const store = {
+  set: (newValue: boolean) => {
+    onboardingTriggered = newValue;
+    emit();
+  },
+  subscribe(listener: any) {
+    listeners = [...listeners, listener];
+    return () => {
+      listeners = listeners.filter((l) => l !== listener);
+    };
+  },
+  getSnapshot() {
+    return onboardingTriggered;
+  }
+};
+
+function emit() {
+  for (const listener of listeners) {
+    listener();
+  }
+}
+
+export function useTriggerOnboarding() {
+  const openStore = useSyncExternalStore(store.subscribe, store.getSnapshot);
+  return [openStore, store.set] as const;
+}
+
+export function OnboardingDialog() {
   const [date, setDate] = useState(new Date());
-  const [_, { addData }] = useDataStore();
+  const [name, setName] = useState("");
+  const [numberOfUnits, setNumberOfUnits] = useState(0);
+  const [_, { setData }] = useDataStore();
+  const [open, setOpen] = useTriggerOnboarding();
+
   return (
     <Dialog
       modal
-      defaultOpen={defaultOpen}
+      open={open}
+      onOpenChange={(isOpen) => {
+        setOpen(isOpen);
+      }}
     >
       <Adapt
         when="sm"
@@ -81,7 +119,7 @@ export function OnboardingDialog({ defaultOpen }: { defaultOpen?: boolean }) {
               id="name"
               placeholder="Ola Nordmann"
               onChange={(e) => {
-                addData("name", e.nativeEvent.text);
+                setName(e.nativeEvent.text);
               }}
             />
           </Fieldset>
@@ -95,7 +133,6 @@ export function OnboardingDialog({ defaultOpen }: { defaultOpen?: boolean }) {
               onChange={(_, newDate) => {
                 if (newDate) {
                   setDate(newDate);
-                  addData("stopDate", newDate);
                 }
               }}
             />
@@ -111,7 +148,7 @@ export function OnboardingDialog({ defaultOpen }: { defaultOpen?: boolean }) {
               hver dag. 7 enheter på lørdag tilsvarer 1 enhet i gjennomsnitt
               hver dag f.eks.
             </Text>
-            <NumberOfUnits addData={addData} />
+            <NumberOfUnits setNumberOfUnits={setNumberOfUnits} />
           </Fieldset>
 
           <YStack
@@ -125,6 +162,10 @@ export function OnboardingDialog({ defaultOpen }: { defaultOpen?: boolean }) {
               <Button
                 theme="green_Button"
                 aria-label="Close"
+                onPress={() => {
+                  setData({ name, stopDate: date, numberOfUnits });
+                  setOpen(false);
+                }}
               >
                 Save changes
               </Button>
@@ -150,9 +191,9 @@ export function OnboardingDialog({ defaultOpen }: { defaultOpen?: boolean }) {
 }
 
 function NumberOfUnits({
-  addData
+  setNumberOfUnits
 }: {
-  addData: (key: string, value: any) => void;
+  setNumberOfUnits: (value: number) => void;
 }) {
   const [selected, setSelected] = useState<null | number>(null);
 
@@ -168,7 +209,7 @@ function NumberOfUnits({
               backgroundColor={selected === index ? "$green5" : "white"}
               onPress={() => {
                 setSelected(index);
-                addData("numberOfUnits", index + 1);
+                setNumberOfUnits(index + 1);
               }}
               borderColor={selected === index ? "$green5" : "$gray5"}
             >

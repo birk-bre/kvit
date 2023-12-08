@@ -1,17 +1,22 @@
 import { useEffect, useLayoutEffect, useState } from "react";
-import { Dimensions } from "react-native";
+import { Dimensions, TextInput } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Book, Clock as ClockIcon, TrendingUp } from "@tamagui/lucide-icons";
 import { format } from "date-fns";
 import {
   Button,
   Card,
+  Fieldset,
+  H1,
   H2,
   H3,
   H4,
   H5,
   Image,
+  Label,
   ScrollView,
   Separator,
+  Spacer,
   Tabs,
   Text,
   XStack,
@@ -19,7 +24,11 @@ import {
 } from "tamagui";
 import { LinearGradient } from "tamagui/linear-gradient";
 
-import { OnboardingDialog } from "../../components/OnboardingDialog";
+import { Gradient } from "../../components/AnimatedGradient";
+import {
+  OnboardingDialog,
+  useTriggerOnboarding
+} from "../../components/OnboardingDialog";
 import { useDataStore } from "../../utils/coreData";
 
 type CoreData = {
@@ -46,7 +55,7 @@ export default function Home() {
         flex={1}
         position="relative"
       >
-        <LinearGradient
+        {/* <LinearGradient
           borderRadius="$4"
           colors={["$blue10", "$pink10"]}
           start={[1, 1]}
@@ -55,48 +64,27 @@ export default function Home() {
           width={dimensons.width}
           height={dimensons.height}
           position="absolute"
-        />
-        <Tabs
-          defaultValue="tab1"
-          orientation="horizontal"
-          flexDirection="column"
-          display="flex"
-          width="100%"
-        >
-          <Tabs.List
-            display="flex"
-            justifyContent="center"
-          >
-            <Tabs.Tab value="tab1">
-              <Text>Fri for</Text>
-            </Tabs.Tab>
-            <Tabs.Tab value="tab2">
-              <Text>Spart</Text>
-            </Tabs.Tab>
-          </Tabs.List>
+        /> */}
 
-          <Tabs.Content
-            value="tab1"
-            p="$4"
-          >
-            <QuitOn data={data ?? undefined} />
-          </Tabs.Content>
+        <Gradient />
+        {/* <AnimatedGradient /> */}
 
-          <Tabs.Content value="tab2">
-            <MoneySaved data={data ?? undefined} />
-          </Tabs.Content>
-        </Tabs>
+        <QuitOn data={data ?? undefined} />
       </YStack>
-      <OnboardingDialog
-        defaultOpen={Object.keys(data).length === 0 && !loading}
-        key={String(data) + String(loading)}
-      />
+      <OnboardingDialog key={String(data) + String(loading)} />
     </>
   );
 }
 
 function QuitOn({ data }: { data?: CoreData }) {
-  if (!data || Object.keys(data).length === 0) return null;
+  //check if data has NAaN
+  if (
+    !data ||
+    Object.keys(data).length === 0 ||
+    isNaN(data?.numberOfUnits) ||
+    isNaN(new Date(data?.stopDate).getTime())
+  )
+    return <Intro />;
 
   const stopDate = new Date(data?.stopDate) ?? new Date();
 
@@ -106,42 +94,35 @@ function QuitOn({ data }: { data?: CoreData }) {
 
   return (
     <ScrollView height={"100%"}>
+      <H2 fontWeight={"700"}>Hei 👋 {data.name}</H2>
       <YStack
-        alignItems="center"
         gap="$3.5"
+        pt="$4"
       >
-        <Image
-          source={require("../../assets/happy.png")}
-          height={100}
-          width={100}
-        />
-        <YStack alignItems="center">
-          <H5>👋{data.name} du sluttet med alkohol</H5>
-          <H4 fontWeight={"700"}>{format(stopDate, "dd. MMMM yy")}</H4>
-          <Clock />
+        <Clock />
 
-          <H5>Du har spart kroppen din for </H5>
-          <XStack>
-            <H4
-              fontWeight={"600"}
-              color={"$red10"}
-            >
-              {data.numberOfUnits * daysSinceStop}
-            </H4>
-            <H5> enheter alkohol</H5>
+        <Card
+          px="$3.5"
+          py="$2"
+        >
+          <XStack
+            gap="$1.5"
+            alignItems="center"
+          >
+            <TrendingUp color="steelblue" />
+            <Text color={"steelblue"}>Du har spart kropppen for</Text>
           </XStack>
+          <XStack alignItems="flex-end">
+            <H2 fontWeight={"600"}>{data.numberOfUnits * daysSinceStop}</H2>
+            <H5 color={"gray"}> enheter alkohol</H5>
+          </XStack>
+          <Separator m="$1.5" />
+          <XStack alignItems="flex-end">
+            <H2 fontWeight={"600"}>{data.numberOfUnits * daysSinceStop * 8}</H2>
+            <H5 color="gray"> gram ren alkohol</H5>
+          </XStack>
+        </Card>
 
-          <XStack>
-            <H4
-              color={"$red10"}
-              fontWeight={"600"}
-            >
-              {data.numberOfUnits * daysSinceStop * 8} gram
-            </H4>
-            <H5> ren alkohol</H5>
-          </XStack>
-          <H5 fontWeight={"700"}>Godt jobbet! 🚀</H5>
-        </YStack>
         <Motivation />
       </YStack>
     </ScrollView>
@@ -149,7 +130,10 @@ function QuitOn({ data }: { data?: CoreData }) {
 }
 
 function Clock() {
-  const quitDate = new Date(2023, 10, 22);
+  const [data] = useDataStore();
+
+  const quitDate = new Date(data?.stopDate) ?? new Date();
+
   const [time, setTime] = useState(new Date());
   const [diff, setDiff] = useState(0);
 
@@ -179,38 +163,60 @@ function Clock() {
     .padStart(2, "0");
 
   return (
-    <XStack
-      alignItems="center"
-      justifyContent="center"
-      borderRadius="$5"
-      padding="$4"
-      gap="$2"
+    <Card
+      justifyContent="flex-start"
+      alignItems="flex-start"
+      px="$3.5"
+      py="$2"
     >
-      <YStack>
-        <H2>{days} :</H2>
-        <Text>dager</Text>
-      </YStack>
-      <YStack>
-        <H2>{hours} :</H2>
-        <Text>timer</Text>
-      </YStack>
-      <YStack>
-        <H2>{minutes} :</H2>
-        <Text>minutter</Text>
-      </YStack>
+      <XStack
+        alignItems="center"
+        gap="$1.5"
+      >
+        <ClockIcon color={"purple"} />
+        <Text color={"purple"}>
+          Du sluttet {format(quitDate, "dd. MMMM yyyy")}
+        </Text>
+      </XStack>
+      <XStack
+        alignItems="center"
+        justifyContent="center"
+        borderRadius="$5"
+        gap="$2"
+      >
+        <YStack>
+          <H2>{days} :</H2>
+          <Text color={"gray"}>dager</Text>
+        </YStack>
 
-      <YStack>
-        <H2>{seconds}</H2>
-        <Text>sekunder</Text>
-      </YStack>
-    </XStack>
+        <YStack>
+          <H2>{hours} : </H2>
+          <Text color={"gray"}>timer</Text>
+        </YStack>
+
+        <YStack>
+          <H2>{minutes} : </H2>
+          <Text
+            ml={"$-2"}
+            color={"gray"}
+          >
+            minutter
+          </Text>
+        </YStack>
+
+        <YStack>
+          <H2>{seconds}</H2>
+          <Text color={"gray"}>sekunder</Text>
+        </YStack>
+      </XStack>
+    </Card>
   );
 }
 
 function Motivation() {
   const quotes = [
     "Det er aldri for sent å bli den du kunne ha vært.",
-    "Hva som ligger bak oss og hva som ligger foran oss er små saker sammenlignet med hva som ligger inne i oss. Emerson",
+    "Hva som ligger bak oss og hva som ligger foran oss er små saker sammenlignet med hva som ligger inne i oss",
     "Endring skjer ikke når vi har en sjanse; den skjer når vi har en beslutning.",
     "Du må være villig til å slippe livet du planla, for å finne livet som venter på deg.",
     "Vanskeligheter bryter noen mennesker, men får andre til å bryte rekorder. Ward",
@@ -220,7 +226,7 @@ function Motivation() {
     "Når alt virker å gå imot deg, husk at flyet tar av mot vinden, ikke med den.",
     "Motivasjon er det som får deg i gang. Vane er det som holder deg gående.",
     "Å endre vår atferd er den ultimate kraften til å endre våre liv.",
-    "Vær ikke redd for å gi slipp på det gode for å gå etter det store.D. Rockefeller",
+    "Vær ikke redd for å gi slipp på det gode for å gå etter det store.",
     "Hemmeligheten til forandring er å fokusere all din energi, ikke på å kjempe mot det gamle, men på å bygge det nye.lt du trenger er allerede inne i deg.",
     "Mot er motstand mot frykt, mestring av frykt, ikke fravær av frykt.",
     "Husk at ikke å få det du vil ha, noen ganger er et fantastisk tilfelle av flaks.",
@@ -242,33 +248,55 @@ function Motivation() {
   //display a random quote
   return (
     <Card
-      p="$4"
-      shadowColor={"$red10"}
-      shadowOffset={{ height: 5, width: 5 }}
+      px="$3.5"
+      py="$2"
     >
-      <H4>{quotes[Math.floor(Math.random() * quotes.length)]}</H4>
+      <XStack
+        alignItems="center"
+        gap="$1.5"
+      >
+        <Book color="orangered" />
+        <Text color="orangered">Husk på</Text>
+      </XStack>
+      <Text
+        fontStyle="italic"
+        fontSize={20}
+        pt="$1"
+      >
+        {quotes[Math.floor(Math.random() * quotes.length)]}
+      </Text>
     </Card>
   );
 }
 
-function MoneySaved({ data }: { data?: CoreData }) {
-  const stopDate = new Date(data?.stopDate) ?? new Date();
-  const daysSinceStop = Math.floor(
-    (new Date().getTime() - stopDate.getTime()) / (1000 * 60 * 60 * 24)
-  );
-
-  //65 is the average price of a unit of alcohol in Norway. This is a very rough estimate
-  const amountSaved = data?.numberOfUnits * daysSinceStop * 65;
-  //monthly saving
-  const monthlySaving = 65 * data?.numberOfUnits * 30;
-  const yearlySaving = monthlySaving * 12;
-
+function Intro() {
+  const [_, setOpen] = useTriggerOnboarding();
   return (
-    <YStack>
-      <H3>{amountSaved}kr</H3>
-      <H4>spart siden du sluttet</H4>
-      <Separator />
-      <H5>{yearlySaving}kr</H5>
+    <YStack
+      alignItems="center"
+      justifyContent="center"
+      gap="$4"
+      flex={1}
+      p="$4"
+    >
+      <Image
+        source={require("../../assets/happy.png")}
+        height={100}
+        width={100}
+      />
+      <H3 fontWeight={"700"}>Velkommen 👋</H3>
+      <H4 fontWeight={"600"}>
+        Dette er en app som hjelper deg å ha kontroll på hvor mye alkohol du
+        drikker
+      </H4>
+      <Button
+        theme="green_Button"
+        onPress={() => {
+          setOpen(true);
+        }}
+      >
+        Kom i gang
+      </Button>
     </YStack>
   );
 }
