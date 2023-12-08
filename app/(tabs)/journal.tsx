@@ -15,24 +15,27 @@ import { useState } from "react";
 import { X } from '@tamagui/lucide-icons'
 import { TextInput, Keyboard,  TouchableWithoutFeedback } from 'react-native';
 import { green } from "@tamagui/themes";
+import { useNoteStore } from "../../utils/notesData";
 
-const notes = [
-  {
-     header: 'Notat 1',
-     content: 'Noe innhold her',
-     time: "03/07/23"
-  },
-  {
-    header: 'Notat 2',
-    content: 'Noe innhold her',
-    time: "03/07/23"
-  },
-  {
-  header: 'Notat 3',
-  content: 'Noe innhold her',
-  time: "03/07/23"
-  }
-]
+// const notes = [
+//   {
+//      header: 'Notat 1',
+//      content: 'Noe innhold her',
+//      time: "03/07/23"
+//   },
+//   {
+//     header: 'Notat 2',
+//     content: 'Noe innhold her',
+//     time: "03/07/23"
+//   },
+//   {
+//   header: 'Notat 3',
+//   content: 'Noe innhold her',
+//   time: "03/07/23"
+//   }
+// ]
+
+
 
 
 
@@ -44,6 +47,12 @@ const DismissKeyboard = ({ children }) => (
 
 export default function Journal() {
 
+  const [notes] = useNoteStore();
+
+  const t = Object.keys(notes).length === 0 ? [] : notes
+
+  console.log("notes",notes )
+
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} 
                           accessible={false}>
@@ -53,11 +62,11 @@ export default function Journal() {
       <H1>Journal</H1>  
 
       {
-        notes.map((note, i) => {
+        t?.map((note, i) => {
           return (
             <Card key={i} style={styles.cardItem} >
               <View flexDirection="row">
-                <H5>{note.header}</H5>
+                <H5>{note.name}</H5>
                 <Text style={styles.cardDate}>{note.time}</Text>
               </View>
               <Text style={styles.cardContent}>{note.content}</Text>
@@ -87,6 +96,8 @@ function DialogInstance() {
     content: '',
     time: ''
   })
+
+  const [_, {addData}] = useNoteStore();
 
   return (
     <Dialog
@@ -155,13 +166,15 @@ function DialogInstance() {
                onChange = {(e) => setNote(prev => ({...prev, content: e.nativeEvent.text}))}/> */}
                <ScrollView>
                 <TextArea minHeight={"$13"} maxHeight={"$13"} flex={1} />
-
                </ScrollView>
       </Fieldset>
 
       <XStack alignSelf="flex-end" gap="$4">
         <Dialog.Close displayWhenAdapted asChild>
-          <Button theme="alt1" aria-label="Close" disabled={note.content.length <= 0}>
+          <Button theme="alt1" aria-label="Close"  onPress={() => {
+            addData({name: "Testnavn", content: "noe innhold", time: "12/11/23"}) 
+            console.log("fefewf")
+          }}>
             Save changes
           </Button>
         </Dialog.Close>
