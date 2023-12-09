@@ -54,20 +54,18 @@ export default function Home() {
         p="$4"
         flex={1}
         position="relative"
+        backgroundColor={"$beige1"}
       >
-        {/* <LinearGradient
+        <LinearGradient
           borderRadius="$4"
-          colors={["$blue10", "$pink10"]}
-          start={[1, 1]}
-          end={[0, 0]}
+          colors={["$blue10", "white"]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 0, y: 1 }}
           opacity={0.15}
           width={dimensons.width}
           height={dimensons.height}
           position="absolute"
-        /> */}
-
-        <Gradient />
-        {/* <AnimatedGradient /> */}
+        />
 
         <QuitOn data={data ?? undefined} />
       </YStack>
@@ -94,7 +92,7 @@ function QuitOn({ data }: { data?: CoreData }) {
 
   return (
     <ScrollView height={"100%"}>
-      <H2 fontWeight={"700"}>Hei 👋 {data.name}</H2>
+      <H2 fontWeight={"700"}>Hei, {data.name}</H2>
       <YStack
         gap="$3.5"
         pt="$4"
