@@ -1,9 +1,13 @@
-import { Text, View } from "tamagui";
+import { H3, Stack } from "tamagui";
 
 export default function Journal() {
   return (
-    <View>
-      <Text>Progress</Text>
-    </View>
+    <Stack
+      flex={1}
+      justifyContent="center"
+      alignItems="center"
+    >
+      <H3>Coming soon</H3>
+    </Stack>
   );
 }

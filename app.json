@@ -9,6 +9,14 @@
     },
     "icon": "./assets/icon.png",
     "name": "kvit",
-    "slug": "kvit"
+    "slug": "kvit",
+    "extra": {
+      "eas": {
+        "projectId": "ee3ffc29-c65f-49bd-b88e-940838422b5c"
+      }
+    },
+    "ios": {
+      "bundleIdentifier": "com.bireid.kvit"
+    }
   }
 }

@@ -39,16 +39,11 @@ type CoreData = {
 
 export default function Home() {
   const dimensons = Dimensions.get("window");
-  const store = useDataStore();
-
-  const data = store[0];
-  const loading = store[2];
+  const [store, { setData }] = useDataStore();
 
   return (
     <>
-      <Button onPress={() => AsyncStorage.setItem("data", JSON.stringify({}))}>
-        Reset
-      </Button>
+      {__DEV__ && <Button onPress={() => setData({})}>Reset</Button>}
       <YStack
         gap="$4"
         p="$4"
@@ -67,9 +62,9 @@ export default function Home() {
           position="absolute"
         />
 
-        <QuitOn data={data ?? undefined} />
+        <QuitOn data={store ?? undefined} />
       </YStack>
-      <OnboardingDialog key={String(data) + String(loading)} />
+      <OnboardingDialog />
     </>
   );
 }

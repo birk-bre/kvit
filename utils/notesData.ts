@@ -33,7 +33,6 @@ let notes: Note[] = [];
 
 const dataStore = {
   addNotes(note: Note) {
-    console.log(note);
     //create new object with new data
     notes = [...notes];
     // writeToMainStorage(notes);

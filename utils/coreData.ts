@@ -22,6 +22,7 @@ async function writeToMainStorage(data: any) {
 }
 
 let listeners: any[] = [];
+
 let coreData: {
   name?: string;
   numberOfUnits?: number;
@@ -42,8 +43,10 @@ const dataStore = {
     emitChange();
   },
   setData(data: any) {
-    coreData = data;
-    writeToMainStorage(data);
+    const newData = data;
+    coreData = newData;
+
+    AsyncStorage.setItem("data", JSON.stringify(newData));
     emitChange();
   },
   subscribe: (listener: any) => {
