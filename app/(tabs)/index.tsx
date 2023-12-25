@@ -24,7 +24,6 @@ import {
 } from "tamagui";
 import { LinearGradient } from "tamagui/linear-gradient";
 
-import { Gradient } from "../../components/AnimatedGradient";
 import {
   OnboardingDialog,
   useTriggerOnboarding
@@ -127,31 +126,12 @@ function Clock() {
 
   const quitDate = new Date(data?.stopDate) ?? new Date();
 
-  const [time, setTime] = useState(new Date());
-  const [diff, setDiff] = useState(0);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setTime(new Date());
-    }, 500);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  useEffect(() => {
-    setDiff(time.getTime() - quitDate.getTime());
-  }, [time]);
+  const diff = new Date().getTime() - quitDate.getTime();
 
   const days = Math.floor(diff / (1000 * 60 * 60 * 24))
     .toString()
     .padStart(2, "0");
   const hours = Math.floor((diff / (1000 * 60 * 60)) % 24)
-    .toString()
-    .padStart(2, "0");
-  const minutes = Math.floor((diff / (1000 * 60)) % 60)
-    .toString()
-    .padStart(2, "0");
-  const seconds = Math.floor((diff / 1000) % 60)
     .toString()
     .padStart(2, "0");
 
@@ -162,46 +142,29 @@ function Clock() {
       px="$3.5"
       py="$2"
     >
-      <XStack
-        alignItems="center"
-        gap="$1.5"
-      >
-        <ClockIcon color={"purple"} />
-        <Text color={"purple"}>
-          Du sluttet {format(quitDate, "dd. MMMM yyyy")}
-        </Text>
-      </XStack>
-      <XStack
-        alignItems="center"
-        justifyContent="center"
-        borderRadius="$5"
-        gap="$2"
-      >
-        <YStack>
-          <H2>{days} :</H2>
-          <Text color={"gray"}>dager</Text>
-        </YStack>
-
-        <YStack>
-          <H2>{hours} : </H2>
-          <Text color={"gray"}>timer</Text>
-        </YStack>
-
-        <YStack>
-          <H2>{minutes} : </H2>
-          <Text
-            ml={"$-2"}
-            color={"gray"}
-          >
-            minutter
+      <YStack gap={5}>
+        <XStack
+          alignItems="center"
+          gap="$1.5"
+        >
+          <ClockIcon color={"purple"} />
+          <Text color={"purple"}>
+            Du sluttet {format(quitDate, "dd. MMMM yyyy")}
           </Text>
-        </YStack>
-
-        <YStack>
-          <H2>{seconds}</H2>
-          <Text color={"gray"}>sekunder</Text>
-        </YStack>
-      </XStack>
+        </XStack>
+        <XStack
+          alignItems="flex-end"
+          justifyContent="center"
+        >
+          <Text
+            // color={"gray"}
+            fontSize={18}
+            pb="$3"
+          >
+            Du er <H4>{days}</H4> dager og <H4>{hours}</H4> timer alkoholfri
+          </Text>
+        </XStack>
+      </YStack>
     </Card>
   );
 }

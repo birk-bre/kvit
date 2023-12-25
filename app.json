@@ -1,14 +1,14 @@
 {
   "expo": {
-    "scheme": "tamagui-app",
+    "scheme": "kvit",
     "userInterfaceStyle": "automatic",
     "splash": {
-      "backgroundColor": "#ddffe2",
+      "backgroundColor": "#ffffff",
       "image": "./assets/splash.png",
       "resizeMode": "contain"
     },
     "icon": "./assets/icon.png",
-    "name": "kvit",
+    "name": "Kvit",
     "slug": "kvit",
     "extra": {
       "eas": {

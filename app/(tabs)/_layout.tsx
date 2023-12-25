@@ -18,20 +18,21 @@ export default function TabsLayout() {
           }}
         />
         <Tabs.Screen
-          name="journal"
-          options={{
-            tabBarLabel: "Journal",
-            tabBarIcon: ({ focused }) => {
-              return <Book color={focused ? "$blue10" : "black"} />;
-            }
-          }}
-        />
-        <Tabs.Screen
           name="progress"
           options={{
             tabBarLabel: "Progress",
             tabBarIcon: ({ focused }) => {
               return <Trophy color={focused ? "$blue10" : "black"} />;
+            }
+          }}
+        />
+
+        <Tabs.Screen
+          name="journal"
+          options={{
+            tabBarLabel: "Journal",
+            tabBarIcon: ({ focused }) => {
+              return <Book color={focused ? "$blue10" : "black"} />;
             }
           }}
         />
